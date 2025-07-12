@@ -1,8 +1,73 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Search from "./components/Search";
+import MovieCard from "./components/MovieCard";
+import Spinner from "./components/Spinner";
+
+const API_HEADERS = {
+  "x-rapidapi-key": import.meta.env.VITE_RAPIDAPI_KEY,
+  "x-rapidapi-host": "imdb236.p.rapidapi.com",
+};
+
+const buildUrl = (query) => {
+  const params = new URLSearchParams();
+  params.append("type", "movie");
+  params.append("rows", 50);
+  params.append("sortOrder", "DESC");
+  params.append("sortField", "id");
+
+  if (query) params.append("primaryTitleAutocomplete", query);
+
+  return `https://imdb236.p.rapidapi.com/api/imdb/search?${params.toString()}`;
+};
+
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedTerm, setDebouncedTerm] = useState(searchTerm);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [moviesList, setMoviesList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Debounce logic
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedTerm(searchTerm);
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const fetchMovies = async (query) => {
+    setIsLoading(true);
+    setErrorMessage("");
+    const url = buildUrl(query);
+
+    try {
+      const response = await fetch(url, { headers: API_HEADERS });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch movies");
+      }
+
+      const data = await response.json();
+
+      if (!data.results || data.results.length === 0) {
+        setErrorMessage("No movies found.");
+        setMoviesList([]);
+      } else {
+        setMoviesList(data.results);
+      }
+    } catch (error) {
+      console.error(`Error fetching movies: ${error}`);
+      setErrorMessage("Error fetching movies. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMovies(debouncedTerm);
+  }, [debouncedTerm]);
 
   return (
     <main>
@@ -15,9 +80,24 @@ const App = () => {
             Find <span className="text-gradient">Movies</span> You'll Enjoy the
             Hassle
           </h1>
+          <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
-        <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        <h1 className="text-white">{searchTerm}</h1>
+
+        <section className="all-movies">
+          <h2 className="mt-[40px]">All Movies</h2>
+
+          {isLoading ? (
+            <Spinner />
+          ) : errorMessage ? (
+            <p className="text-red-500">{errorMessage}</p>
+          ) : (
+            <ul>
+              {moviesList.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
     </main>
   );
