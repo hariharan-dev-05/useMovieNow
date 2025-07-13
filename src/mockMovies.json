@@ -1,0 +1,44 @@
+{
+    "results": [
+        {
+            "id": "tt0111161",
+            "primaryTitle": "The Shawshank Redemption",
+            "primaryImage": "",
+            "releaseDate": "1994-09-23",
+            "spokenLanguages": [
+                "English"
+            ],
+            "averageRating": 9.3
+        },
+        {
+            "id": "tt0068646",
+            "primaryTitle": "The Godfather",
+            "primaryImage": "",
+            "releaseDate": "1972-03-24",
+            "spokenLanguages": [
+                "English"
+            ],
+            "averageRating": 9.2
+        },
+        {
+            "id": "tt0468569",
+            "primaryTitle": "The Dark Knight",
+            "primaryImage": "",
+            "releaseDate": "2008-07-18",
+            "spokenLanguages": [
+                "English"
+            ],
+            "averageRating": 9.0
+        },
+        {
+            "id": "tt0071562",
+            "primaryTitle": "The Godfather Part II",
+            "primaryImage": "",
+            "releaseDate": "1974-12-20",
+            "spokenLanguages": [
+                "English"
+            ],
+            "averageRating": 9.0
+        }
+    ]
+}

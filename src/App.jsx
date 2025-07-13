@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Search from "./components/Search";
 import MovieCard from "./components/MovieCard";
 import Spinner from "./components/Spinner";
+import mockMovies from "./mockMovies.json";
 
 const API_HEADERS = {
   "x-rapidapi-key": import.meta.env.VITE_RAPIDAPI_KEY,
@@ -19,7 +20,6 @@ const buildUrl = (query) => {
 
   return `https://imdb236.p.rapidapi.com/api/imdb/search?${params.toString()}`;
 };
-
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,14 +52,25 @@ const App = () => {
       const data = await response.json();
 
       if (!data.results || data.results.length === 0) {
-        setErrorMessage("No movies found.");
+        throw new Error("No movies found from API.");
+      }
+
+      setMoviesList(data.results);
+    } catch (error) {
+      console.error("API error, loading mock data instead:", error.message);
+      // Load mock data as fallback
+      const filteredMockMovies = query
+        ? mockMovies.results.filter((movie) =>
+            movie.primaryTitle.toLowerCase().includes(query.toLowerCase())
+          )
+        : mockMovies.results;
+
+      if (filteredMockMovies.length === 0) {
+        setErrorMessage("No movies found (from API or mock data).");
         setMoviesList([]);
       } else {
-        setMoviesList(data.results);
+        setMoviesList(filteredMockMovies);
       }
-    } catch (error) {
-      console.error(`Error fetching movies: ${error}`);
-      setErrorMessage("Error fetching movies. Please try again later.");
     } finally {
       setIsLoading(false);
     }
